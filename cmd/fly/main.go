@@ -25,6 +25,7 @@ var (
 	googleApiKey  = flag.String("google.apikey", os.Getenv("GOOGLE_API_KEY"), "google api key for airports svc")
 	atmosAcctID   = flag.String("atmos.acctID", os.Getenv("ATMOS_ACCOUNT_ID"), "account id for atmosfaire api")
 	atmosPassword = flag.String("atmos.pass", os.Getenv("ATMOS_PASSWORD"), "password for atmosfaire api")
+	edgeApiKey    = flag.String("edge.apiKey", os.Getenv("EDGE_API_KEY"), "key for edge api to find nearst airport code")
 )
 
 // We begin by crawling the RA top 1000 artists.
@@ -80,7 +81,7 @@ func main() {
 		log.Fatal(err)
 	}
 	googleApi := google.NewApi(*googleApiKey)
-	airSvc, err := airports.New("./airports.csv", googleApi)
+	airSvc, err := airports.New("./airports.csv", *edgeApiKey, googleApi)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,7 +100,6 @@ func main() {
 	}
 
 	for _, artist := range artists {
-		fmt.Printf("Processing artist: %s...", artist.Name)
 		events, err := raSvc.LoadEvents(artist)
 		errCheck(err)
 		artist.Events = events
@@ -134,6 +134,9 @@ func parseFlags() {
 	}
 	if *atmosPass == "" {
 		log.Fatal("atmosfaire password for carbon emissions api")
+	}
+	if *atmosPass == "" {
+		log.Fatal("edge api key missing for nearest aircode")
 	}
 
 }
