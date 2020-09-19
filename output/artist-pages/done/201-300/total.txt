@@ -1,0 +1,5 @@
+Total Carbon Offset: 94698.000000EU
+Total Carbon Output: 3817094.430000KG
+Total Amount of Fuel Used: 350651.280000L 
+Total Distance Tradeled: 12700641.000000Km
+Total Number of Flights Taken: 5277 
