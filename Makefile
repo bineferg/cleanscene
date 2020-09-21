@@ -10,6 +10,8 @@ fly:
 	go build -o $@ ./cmd/fly
 count:
 	go build -o $@ ./cmd/count
+cleanup:
+	go build -o $@ ./cmd/cleanup
 
 stats: 
 	go build -o $@ ./cmd/stats
