@@ -15,11 +15,11 @@ import (
 
 type RA interface {
 	LoadArtists(string) (map[string]Artist, error)
-	LoadEvents(Artist) (map[time.Time]event.Event, error)
+	LoadEvents(Artist) (Events, error)
 }
 
 func New(airSvc airports.Airports, crwlr crawler.Crawler, outputDir, tourYear string) RA {
-	return ResidentAdvisor{
+	return residentAdvisor{
 		airSvc:    airSvc,
 		crawler:   crwlr,
 		outputDir: outputDir,

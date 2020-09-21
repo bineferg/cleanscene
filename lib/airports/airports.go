@@ -14,7 +14,7 @@ import (
 
 type Airports interface {
 	AirCodeByCity(string, string) (string, error)
-	FindClosestAirport(string) (google.Edge, error)
+	FindClosestAirport(string) (Edge, error)
 }
 
 func New(fname, edgeKey string, googleApi google.Places) (Airports, error) {
@@ -35,7 +35,7 @@ func New(fname, edgeKey string, googleApi google.Places) (Airports, error) {
 	if err := scanner.Err(); err != nil {
 		return as, err
 	}
-	as.localData = airports
+	as.cache = airports
 	as.googleapi = googleApi
 	as.edgeHost = "http://aviation-edge.com/v2/public/nearby?key="
 	as.edgeKey = edgeKey
@@ -43,7 +43,7 @@ func New(fname, edgeKey string, googleApi google.Places) (Airports, error) {
 }
 
 type service struct {
-	googleapi google.GooglePlaces
+	googleapi google.Places
 
 	// Local datastore downloaded from https://datahub.io/core/airport-codes
 	cache    map[string]string
@@ -84,7 +84,7 @@ func (as service) FindClosestAirport(location string) (Edge, error) {
 
 func (as service) AirCodeByCity(city, country string) (string, error) {
 	var aircode string
-	for code, place := range as.localData {
+	for code, place := range as.cache {
 		if strings.Contains(place, strings.ToUpper(city)) {
 			aircode = code
 		}

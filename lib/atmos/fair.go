@@ -10,7 +10,9 @@ import (
 )
 
 type AtmosFair interface {
-	Calculate(trips []flight.Trip) ([]Output, error)
+	Calculate(flight.Trips) ([]Output, error)
+	Do(AtmosReq) FlightResp
+	NewSyncReq(string, string, string) AtmosReq
 }
 
 type service struct {
@@ -58,7 +60,7 @@ type Flight struct {
 	FlightCount   int    `json:"flightCount"`
 }
 
-func (s service) Calculate(trips []flight.Trip) ([]Output, error) {
+func (s service) Calculate(trips flight.Trips) ([]Output, error) {
 	var outputs = make([]Output, 0)
 	atmosReq := AtmosReq{
 		AccountID: s.acctID,
@@ -114,6 +116,46 @@ func (s service) bulkReq(req AtmosReq) (AtmosResp, error) {
 	return atmosResp, nil
 }
 
+func (s service) Do(req AtmosReq) FlightResp {
+
+	var atmosResp = AtmosResp{}
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(req)
+	httpReq, _ := http.NewRequest("POST", s.host, b)
+	httpReq.Header.Set("Accept", "application/json, text/plain, */*")
+	httpReq.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	resp, err := s.cli.Do(httpReq)
+	defer resp.Body.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+		return FlightResp{}
+	}
+	json.NewDecoder(resp.Body).Decode(&atmosResp)
+	if atmosResp.Status != "SUCCESS" {
+		fmt.Printf("ATMOS ERROR: %v for request: %v\n", atmosResp.Errors, req)
+		return FlightResp{}
+	}
+	return atmosResp.Flights[0]
+
+}
+
+func (s service) NewSyncReq(dep, arr, date string) AtmosReq {
+	return AtmosReq{
+		AccountID: s.acctID,
+		Password:  s.password,
+		Flights: []Flight{
+			{
+
+				DepartCode:    dep,
+				ArrivalCode:   arr,
+				DepartureDate: date,
+				FlightCount:   1,
+				PassCount:     1,
+			},
+		},
+	}
+}
+
 func (s service) syncReq(req AtmosReq) []FlightResp {
 	var fResp = make([]FlightResp, 0)
 	for _, flight := range req.Flights {
@@ -122,24 +164,8 @@ func (s service) syncReq(req AtmosReq) []FlightResp {
 			Password:  s.password,
 			Flights:   []Flight{flight},
 		}
-		var atmosResp = AtmosResp{}
-		b := new(bytes.Buffer)
-		json.NewEncoder(b).Encode(rr)
-		httpReq, _ := http.NewRequest("POST", s.host, b)
-		httpReq.Header.Set("Accept", "application/json, text/plain, */*")
-		httpReq.Header.Set("Content-Type", "application/json;charset=UTF-8")
-		resp, err := s.cli.Do(httpReq)
-		defer resp.Body.Close()
-		if err != nil {
-			fmt.Println(err.Error())
-			continue
-		}
-		json.NewDecoder(resp.Body).Decode(&atmosResp)
-		if atmosResp.Status != "SUCCESS" {
-			fmt.Printf("ATMOS ERROR: %v for request: %v\n", atmosResp.Errors, rr)
-			continue
-		}
-		fResp = append(fResp, atmosResp.Flights[0])
+		ff := s.Do(rr)
+		fResp = append(fResp, ff)
 	}
 	return fResp
 

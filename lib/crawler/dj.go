@@ -19,7 +19,7 @@ type Crawler interface {
 func New(baseUrl string) (Crawler, error) {
 	resp, err := http.Get(baseUrl + "/dj.aspx")
 	if err != nil {
-		return DJCrawler{}, err
+		return djCrawler{}, err
 	}
 	defer resp.Body.Close()
 	var artistLinkMap = make(map[string]string)

@@ -23,7 +23,7 @@ func NewApi(key string) Places {
 	return Api{
 		key:           key,
 		hostCoordUrl:  "https://maps.googleapis.com/maps/api/place/textsearch/json?query=",
-		hostcoordText: "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=",
+		hostCoordText: "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=",
 	}
 }
 
