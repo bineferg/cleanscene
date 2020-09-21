@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -77,19 +79,7 @@ func getTotalNumbers(fileName string) (float64, float64, float64, float64, int) 
 
 }
 
-var dir = flag.String("dir", "", "artist dir")
-
-func main() {
-	var files []string
-	flag.Parse()
-	root := fmt.Sprintf("./done/%s/artist-pages/", *dir)
-
-	_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if strings.Contains(path, "csv") {
-			files = append(files, path)
-		}
-		return nil
-	})
+func countAll(files []string) {
 	var totalEU, totalCar, totalFuel, totalDist float64
 	var totalFlights int
 	for _, file := range files {
@@ -105,4 +95,87 @@ func main() {
 	fmt.Printf("Total Amount of Fuel Used: %fL \n", totalFuel)
 	fmt.Printf("Total Distance Tradeled: %fKm\n", totalDist)
 	fmt.Printf("Total Number of Flights Taken: %d \n", totalFlights)
+
+}
+
+type stat struct {
+	name string
+	val  float64
+}
+
+func compare(stats []stat, val float64) {
+	var compVal float64
+	sort.Slice(stats, func(i, j int) bool {
+		return int(stats[i].val) < int(stats[j].val)
+	})
+	var numBottomArtists = 0
+	for _, stat := range stats {
+		if compVal < val {
+			compVal = compVal + stat.val
+			numBottomArtists++
+		}
+	}
+	fmt.Printf("Equivalient to the bottom %d number of artsts", numBottomArtists)
+
+}
+
+func countTop10(files []string, field string) {
+	var stats = make([]stat, 0)
+	for _, file := range files {
+		switch field {
+		case "offset":
+			eu, _, _, _, _ := getTotalNumbers(file)
+			stats = append(stats, stat{name: file, val: eu})
+		case "carbon":
+			_, car, _, _, _ := getTotalNumbers(file)
+			stats = append(stats, stat{name: file, val: car})
+		case "fuel":
+			_, _, fuel, _, _ := getTotalNumbers(file)
+			stats = append(stats, stat{name: file, val: fuel})
+		case "distance":
+			_, _, _, dist, _ := getTotalNumbers(file)
+			stats = append(stats, stat{name: file, val: dist})
+		case "flights":
+			_, _, _, _, flights := getTotalNumbers(file)
+			stats = append(stats, stat{name: file, val: float64(flights)})
+		}
+	}
+	sort.Slice(stats, func(i, j int) bool {
+		return int(stats[i].val) > int(stats[j].val)
+	})
+	fmt.Printf("The top 10 highest numbers for %s are...\n", field)
+	var totalVal float64
+	for _, stat := range stats[:10] {
+		totalVal = totalVal + stat.val
+		pathName := strings.Split(stat.name, "/")
+		name := strings.Replace(pathName[len(pathName)-1], ".csv", "", -1)
+		fmt.Printf("%s: %f\n", name, stat.val)
+	}
+	fmt.Printf("Totaling at: %f", totalVal)
+	compare(stats, totalVal)
+}
+
+var param = flag.String("param", "", "what you want to count")
+var field = flag.String("field", "", "which field you want to count")
+
+func main() {
+	var files []string
+	flag.Parse()
+	root := "./output/artist-pages/cleanup"
+
+	_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if strings.Contains(path, "csv") {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	switch *param {
+	case "total":
+		countAll(files)
+	case "top-10":
+		countTop10(files, *field)
+	default:
+		log.Fatal("nothing to count :/")
+	}
 }
