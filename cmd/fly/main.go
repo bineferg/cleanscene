@@ -18,7 +18,6 @@ import (
 
 var (
 	tourYear   = flag.String("tour.year", "2019", "year in which to scrape artist event schedule")
-	parameter  = flag.String("parameter", "artist", "variable by which to split up the flight data")
 	outputDir  = flag.String("output.dir", "./done/artist-pages", "directory to write flight data csv output to")
 	artistFile = flag.String("artist.inputs", "./fixtures/ra-1000.csv", "precompiled, editied list of the RA artists")
 
@@ -117,9 +116,6 @@ func parseFlags() {
 	if *tourYear == "" {
 		log.Fatal("missing tour year for aritst")
 	}
-	if *parameter == "" {
-		log.Fatal("missing sliced parameter for data")
-	}
 	if *outputDir == "" {
 		log.Fatal("outputdir missing to write files to")
 	}
@@ -135,7 +131,7 @@ func parseFlags() {
 	if *atmosPass == "" {
 		log.Fatal("atmosfaire password for carbon emissions api")
 	}
-	if *atmosPass == "" {
+	if *edgeApiKey == "" {
 		log.Fatal("edge api key missing for nearest aircode")
 	}
 
