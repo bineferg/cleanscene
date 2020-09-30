@@ -1,4 +1,4 @@
-# CleanScene
+# ![CleanScene](https://github.com/bineferg/cleanscene/blob/master/fixtures/logo.jpg)
 
 [web](https://cleanscene.club) :: [insta](https://www.instagram.com/cleanscene.club) :: [fb](https://www.facebook.com/makeacleanscene)
 
