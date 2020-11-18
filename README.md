@@ -36,4 +36,4 @@ If you are an artist, promoter or an agency and would like to monitor the enviro
 
 ## Contributions and Feedback
 
-	This project is free and open source. Contributions and feedback of any type are welcome, but please be respectful to others. Issues can be reported as Github issues or via makeacleanscene@gmail.com
+This project is free and open source. Contributions and feedback of any type are welcome, but please be respectful to others. Issues can be reported as Github issues or via makeacleanscene@gmail.com
