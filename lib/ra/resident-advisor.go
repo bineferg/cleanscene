@@ -15,7 +15,7 @@ import (
 
 type RA interface {
 	LoadArtists(string) (map[string]Artist, error)
-	LoadEvents(Artist) (Events, error)
+	LoadEvents(Artist) (crawler.Events, error)
 }
 
 func New(airSvc airports.Airports, crwlr crawler.Crawler, outputDir, tourYear string) RA {
@@ -81,7 +81,7 @@ type Artist struct {
 
 type Events map[time.Time]event.Event
 
-func (ra residentAdvisor) getEventAirports(events Events) Events {
+func (ra residentAdvisor) getEventAirports(events crawler.Events) crawler.Events {
 	for d, e := range events {
 		edge, err := ra.airSvc.FindClosestAirport(e.Location)
 		if err != nil {
@@ -96,8 +96,8 @@ func (ra residentAdvisor) getEventAirports(events Events) Events {
 	return events
 }
 
-func (ra residentAdvisor) LoadEvents(a Artist) (Events, error) {
-	events, err := ra.crawler.GetEvents(a.Link, ra.tourYear)
+func (ra residentAdvisor) LoadEvents(a Artist) (crawler.Events, error) {
+	events, err := ra.crawler.GetArtistEvents(a.Link, ra.tourYear)
 	if err != nil {
 		return events, err
 	}
