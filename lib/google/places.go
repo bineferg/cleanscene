@@ -27,7 +27,7 @@ func NewApi(key string) Places {
 	}
 }
 
-type Resp struct {
+type PlaceResp struct {
 	Results    []Result `json:"results"`
 	Candidates []Result `json:"candidates"`
 }
@@ -52,28 +52,37 @@ const (
 	TextQuery
 )
 
+var (
+	coordParams = "inputtype=textquery&fields=name,formatted?address,geometry&key="
+	textParams  = "inputtype=textquery&fields=geometry&key="
+)
+
 func (api Api) QueryCoordinates(place string, queryType QueryType) (float64, float64, error) {
-	var gResp = Resp{}
-	var query string
+	var (
+		rr    = PlaceResp{}
+		query string
+	)
 	switch queryType {
 	case CoordQuery:
-		query = fmt.Sprintf("%s%s&inputtype=textquery&fields=name,formatted?address,geometry&key=%s", api.hostCoordUrl, place, api.key)
+		query = fmt.Sprintf("%s%s&%s%s", api.hostCoordUrl, coordParams, place, api.key)
 	case TextQuery:
 		place = strings.ReplaceAll(place, ",", "")
-		query = fmt.Sprintf("%s%s&inputtype=textquery&fields=geometry&key=%s", api.hostCoordText, url.PathEscape(place), api.key)
+		query = fmt.Sprintf("%s%s&%s%s", api.hostCoordText, textParams, url.PathEscape(place), api.key)
 	}
 	resp, err := http.Get(query)
 	if err != nil {
 		return 0, 0, err
 	}
 	defer resp.Body.Close()
-	json.NewDecoder(resp.Body).Decode(&gResp)
-	if len(gResp.Candidates) != 0 {
-		return gResp.Candidates[0].Geometry.Location.Long, gResp.Candidates[0].Geometry.Location.Lat, nil
+	json.NewDecoder(resp.Body).Decode(&rr)
+
+	// For simplicity we choose the first response of which ever one is populated.
+	if len(rr.Candidates) != 0 {
+		return rr.Candidates[0].Geometry.Location.Long, rr.Candidates[0].Geometry.Location.Lat, nil
 
 	}
-	if len(gResp.Results) != 0 {
-		return gResp.Results[0].Geometry.Location.Long, gResp.Results[0].Geometry.Location.Lat, nil
+	if len(rr.Results) != 0 {
+		return rr.Results[0].Geometry.Location.Long, rr.Results[0].Geometry.Location.Lat, nil
 
 	}
 	return 0, 0, errors.New("no coordintes found!")
