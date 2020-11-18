@@ -119,7 +119,7 @@ func compare(stats []stat, val float64) {
 
 }
 
-func countTop10(files []string, field string) {
+func countTopN(files []string, field string, n int) {
 	var stats = make([]stat, 0)
 	for _, file := range files {
 		switch field {
@@ -143,9 +143,9 @@ func countTop10(files []string, field string) {
 	sort.Slice(stats, func(i, j int) bool {
 		return int(stats[i].val) > int(stats[j].val)
 	})
-	fmt.Printf("The top 10 highest numbers for %s are...\n", field)
+	fmt.Printf("The top %d highest numbers for %s are...\n", n, field)
 	var totalVal float64
-	for _, stat := range stats[:10] {
+	for _, stat := range stats[:n] {
 		totalVal = totalVal + stat.val
 		pathName := strings.Split(stat.name, "/")
 		name := strings.Replace(pathName[len(pathName)-1], ".csv", "", -1)
@@ -156,7 +156,8 @@ func countTop10(files []string, field string) {
 }
 
 var param = flag.String("param", "", "what you want to count")
-var field = flag.String("field", "", "which field you want to count")
+var countN = flag.Int("N", 10, "number of top artists you want the count for")
+var field = flag.String("field", "", "what you want the total of")
 
 func main() {
 	var files []string
@@ -173,8 +174,8 @@ func main() {
 	switch *param {
 	case "total":
 		countAll(files)
-	case "top-10":
-		countTop10(files, *field)
+	case "top-N":
+		countTopN(files, *field, *countN)
 	default:
 		log.Fatal("nothing to count :/")
 	}
