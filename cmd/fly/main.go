@@ -17,9 +17,10 @@ import (
 )
 
 var (
-	tourYear   = flag.String("tour.year", "2019", "year in which to scrape artist event schedule")
-	outputDir  = flag.String("output.dir", "./done/artist-pages", "directory to write flight data csv output to")
-	artistFile = flag.String("artist.inputs", "./fixtures/ra-1000.csv", "precompiled, editied list of the RA artists")
+	tourYear    = flag.String("tour.year", "2019", "year in which to scrape artist event schedule")
+	outputDir   = flag.String("output.dir", "./done/artist-pages", "directory to write flight data csv output to")
+	artistFile  = flag.String("artist.inputs", "./fixtures/ra-1000.csv", "precompiled, editied list of the RA artists")
+	airportFile = flag.String("airport.inputs", "/fixtures/airports.csv", "precompiled list of major airpot codes and their major city")
 
 	googleApiKey  = flag.String("google.apikey", os.Getenv("GOOGLE_API_KEY"), "google api key for airports svc")
 	atmosAcctID   = flag.String("atmos.acctID", os.Getenv("ATMOS_ACCOUNT_ID"), "account id for atmosfaire api")
@@ -39,19 +40,21 @@ var metaDataHeaders = []string{"DEPARTURE", "ARRIVAL", "DATE", "OFFSET", "CARBON
 // By default, dont fail on error simply log.
 var errCheck = func(err error) {
 	if err != nil {
-		log.Info(err.Error())
+		log.Info(err)
+	}
+}
+
+// Fail on critical errors.
+var errFail = func(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
 // Write flight & carbon output data to artist csv file
 func writeTo(outputs []atmos.Output, artistName, outputDir string) {
 	csvfile, err := os.Create(fmt.Sprintf("%s/%s.csv", outputDir, artistName))
-
-	if err != nil {
-		fmt.Printf("failed creating file: %s", err)
-		return
-	}
-
+	errFail(err)
 	csvwriter := csv.NewWriter(csvfile)
 	csvwriter.Write(metaDataHeaders)
 	for _, output := range outputs {
@@ -69,34 +72,28 @@ func writeTo(outputs []atmos.Output, artistName, outputDir string) {
 	}
 
 	csvwriter.Flush()
-
 	csvfile.Close()
 }
 
 func main() {
 	parseFlags()
+
 	djCrawler, err := crawler.New(baseUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
+	errFail(err)
+
 	googleApi := google.NewApi(*googleApiKey)
-	airSvc, err := airports.New("./airports.csv", *edgeApiKey, googleApi)
-	if err != nil {
-		log.Fatal(err)
-	}
+	airSvc, err := airports.New(*airportFile, *edgeApiKey, googleApi)
+	errFail(err)
 
 	raSvc := ra.New(airSvc, djCrawler, *outputDir, *tourYear)
 	cclient, err := country_mapper.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
+	errFail(err)
 
 	planner := flight.NewPlanner(cclient)
 	atmosSvc := atmos.NewFair(atmosUrl, *atmosAcctID, *atmosPass)
+
 	artists, err := raSvc.LoadArtists(*artistFile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	errFail(err)
 
 	for _, artist := range artists {
 		events, err := raSvc.LoadEvents(artist)
@@ -120,6 +117,9 @@ func parseFlags() {
 		log.Fatal("outputdir missing to write files to")
 	}
 	if *artistFile == "" {
+		log.Fatal("missing pre-compiled list of artists intended to scrape")
+	}
+	if *airportFile == "" {
 		log.Fatal("missing pre-compiled list of artists intended to scrape")
 	}
 	if *googleApiKey == "" {
