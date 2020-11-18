@@ -17,12 +17,16 @@ type Airports interface {
 	FindClosestAirport(string) (Edge, error)
 }
 
+type AirMap map[string]string
+
 func New(fname, edgeKey string, googleApi google.Places) (Airports, error) {
-	var as service
-	var airports = make(map[string]string)
+	var (
+		airSvc   service
+		airports = make(AirMap)
+	)
 	file, err := os.Open(fname)
 	if err != nil {
-		return as, err
+		return airSvc, err
 	}
 	defer file.Close()
 
@@ -31,24 +35,46 @@ func New(fname, edgeKey string, googleApi google.Places) (Airports, error) {
 		arr := strings.Split(scanner.Text(), " - ")
 		airports[arr[0]] = strings.Join(arr[1:], " ")
 	}
-
 	if err := scanner.Err(); err != nil {
-		return as, err
+		return airSvc, err
 	}
-	as.cache = airports
-	as.googleapi = googleApi
-	as.edgeHost = "http://aviation-edge.com/v2/public/nearby?key="
-	as.edgeKey = edgeKey
-	return as, nil
+	airSvc.cache = airports
+	airSvc.googleapi = googleApi
+	airSvc.edgeHost = "http://aviation-edge.com/v2/public/nearby?key="
+	airSvc.edgeKey = edgeKey
+	return airSvc, nil
 }
 
 type service struct {
 	googleapi google.Places
 
 	// Local datastore downloaded from https://datahub.io/core/airport-codes
-	cache    map[string]string
+	cache    AirMap
 	edgeHost string
 	edgeKey  string
+}
+
+type Edge struct {
+	Code     string `json:"codeIataAirport"`
+	Country  string `json:"nameCountry"`
+	CityCode string `json:"codeIataCity"`
+}
+
+type Edges []Edge
+
+func (as service) nearestAirportByCoords(lng, lat float64) (Edges, error) {
+	var edges = Edges{}
+	query := fmt.Sprintf("%s%s&lat=%f&lng=%f&distance=500", as.edgeHost, as.edgeKey, lat, lng)
+	resp, err := http.Get(query)
+	if err != nil {
+		return edges, err
+	}
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&edges)
+	if len(edges) == 0 {
+		return edges, errors.New("No airports found!")
+	}
+	return edges, nil
 }
 
 func isUrl(location string) bool { return strings.Contains(location, "http") }
@@ -67,6 +93,7 @@ func (as service) FindClosestAirport(location string) (Edge, error) {
 	} else {
 		lng, lat, err = as.googleapi.QueryCoordinates(location, google.TextQuery)
 	}
+
 	if err != nil {
 		return Edge{}, err
 	}
@@ -98,27 +125,4 @@ func (as service) AirCodeByCity(city, country string) (string, error) {
 	}
 	return aircode, nil
 
-}
-
-type Edge struct {
-	Code     string `json:"codeIataAirport"`
-	Country  string `json:"nameCountry"`
-	CityCode string `json:"codeIataCity"`
-}
-
-type Edges []Edge
-
-func (as service) nearestAirportByCoords(lng, lat float64) (Edges, error) {
-	var eResp = Edges{}
-	query := fmt.Sprintf("%s%s&lat=%f&lng=%f&distance=500", as.edgeHost, as.edgeKey, lat, lng)
-	resp, err := http.Get(query)
-	if err != nil {
-		return eResp, err
-	}
-	defer resp.Body.Close()
-	json.NewDecoder(resp.Body).Decode(&eResp)
-	if len(eResp) == 0 {
-		return eResp, errors.New("No airports found!")
-	}
-	return eResp, nil
 }
