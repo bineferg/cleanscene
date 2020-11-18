@@ -25,7 +25,7 @@ The artist will fly in and out of the international airport closest to the addre
 *Note*: If an event location or flight route could not be found for a gig, the event was left out.
 
 ### Want to know your impact?
-	If you are an artist on the [RA 1000](https://www.residentadvisor.net/dj.aspx) list and want to know, dispute, or contribute (for the sake of accuracy) your environmental impact as a result of fast gigging please email makeacleanscene@gmail.com with your RA artist link and inquiry.
+If you are an artist on the [RA 1000](https://www.residentadvisor.net/dj.aspx) list and want to know, dispute, or contribute (for the sake of accuracy) your environmental impact as a result of fast gigging please email makeacleanscene@gmail.com with your RA artist link and inquiry.
 
 
 ## The Carbon Calculator
