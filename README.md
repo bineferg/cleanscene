@@ -4,14 +4,13 @@
 
 A climate action collective exploring alternative futures for the dance music community.
 
-It is communal spaces, not flights, that are inextricably linked with the music industry. 
-Shared experience, not fast travel, is the lifeblood of our scene.
+"It is communal spaces, not flights, that are inextricably linked with the music industry. 
+Shared experience, not fast travel, is the lifeblood of our scene."
 
 ## RA Top 1000
 
 This project was done in an attempt to bring further awareness to the environmental detriment that our scene creates.
 
-`./cmd/fly` takes an input file of the top 1000 DJ list curated by [RA](https://www.residentadvisor.net/dj.aspx), web crawls through each artists event schedule posted by RA, and calculates the carbon impact of that touring schedule.
 
 ### Assumptions
 We have made a set of assumptions in order to make a reasonable calculation with the public data available. They are as follows:
@@ -26,10 +25,15 @@ The artist will fly in and out of the international airport closest to the addre
 *Note*: If an event location or flight route could not be found for a gig, the event was left out.
 
 ### Want to know your impact?
-If you are an artist on the RA 1000 list and want to know, dispute, or contribute (for the sake of accuracy) your environmental impact as a result of fast gigging please email makeacleanscene@gmail.com with your RA artist link and inquiry.
+	If you are an artist on the [RA 1000](https://www.residentadvisor.net/dj.aspx) list and want to know, dispute, or contribute (for the sake of accuracy) your environmental impact as a result of fast gigging please email makeacleanscene@gmail.com with your RA artist link and inquiry.
 
 
 ## The Carbon Calculator
 
 We have created a google spreadsheet enhanced with a script to calculate a carbon offset in eu for that artists gig.
-If you are an artist, promoter or an agency and would like to contribute please email makeacleanscene@gmail.com and we can send you a scripted sheet.
+If you are an artist, promoter or an agency and would like to monitor the environmental impact of your gigging schedule, please email makeacleanscene@gmail.com and we can send you a scripted sheet.
+
+
+## Contributions and Feedback
+
+	This project is free and open source. Contributions and feedback of any type are welcome, but please be respectful to others. Issues can be reported as Github issues or via makeacleanscene@gmail.com
