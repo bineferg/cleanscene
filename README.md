@@ -1,6 +1,6 @@
 # ![CleanScene](https://github.com/bineferg/cleanscene/blob/master/fixtures/logo.jpg)
 
-[web](https://cleanscene.club) :: [insta](https://www.instagram.com/cleanscene.club) :: [fb](https://www.facebook.com/makeacleanscene)
+[web](https://cleanscene.club) :: [insta](https://www.instagram.com/cleanscene.club) :: [fb](https://www.facebook.com/makeacleanscene) :: [slack](https://docs.google.com/forms/d/e/1FAIpQLSealSPbCRCFFmxXfYZdQ-Yglb7DMb0RQnOD5q1e7Uc8Frw7Zg/viewform?gxids=7628)
 
 A climate action collective exploring alternative futures for the dance music community.
 
