@@ -125,6 +125,9 @@ func (s service) Do(req AtmosReq) FlightResp {
 	httpReq.Header.Set("Accept", "application/json, text/plain, */*")
 	httpReq.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	resp, err := s.cli.Do(httpReq)
+	if err != nil {
+		fmt.Println(err)
+	}
 	defer resp.Body.Close()
 	if err != nil {
 		fmt.Println(err.Error())
