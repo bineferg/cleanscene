@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"log"
@@ -155,14 +156,71 @@ func countTopN(files []string, field string, n int) {
 	compare(stats, totalVal)
 }
 
+type orderedStat struct {
+	name     string
+	flights  float64
+	distance float64
+	carbon   float64
+	offset   float64
+}
+
+func tostring(stats []orderedStat) {
+	fmt.Printf("RA Top 1000* DJs: \n")
+	fmt.Printf("| %s | %s | %s | %s | %s |\n", "Artist", "Carbon (kg)", "Flights", "Offset (€)", "Distance (km)")
+	for _, stat := range stats {
+		fmt.Printf("| %s | %f | %f | %f | %f |\n", stat.name, stat.carbon, stat.flights, stat.offset, stat.distance)
+	}
+}
+
+var metaDataHeaders = []string{"Artist", "Carbon (kg)", "Flights", "Offset (€)", "Distance (km)"}
+
+// Write flight & carbon output data to artist csv file
+func writeTo(stats []orderedStat, fName, outputDir string) {
+	csvfile, _ := os.Create(fmt.Sprintf("%s/%s.csv", outputDir, fName))
+	csvwriter := csv.NewWriter(csvfile)
+	csvwriter.Write(metaDataHeaders)
+	for _, stat := range stats {
+		row := []string{
+			stat.name,
+			fmt.Sprintf("%f", stat.carbon),
+			fmt.Sprintf("%f", stat.flights),
+			fmt.Sprintf("%f", stat.offset),
+			fmt.Sprintf("%f", stat.distance),
+		}
+		err := csvwriter.Write(row)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	csvwriter.Flush()
+	csvfile.Close()
+}
+
+func countAllOrdered(files []string, orderBy string) {
+	var stats = make([]orderedStat, 0)
+	for _, file := range files {
+		eu, car, _, dist, flights := getTotalNumbers(file)
+		pathName := strings.Split(file, "/")
+		name := strings.Replace(pathName[len(pathName)-1], ".csv", "", -1)
+		stats = append(stats, orderedStat{name: name, flights: float64(flights), carbon: car, distance: dist, offset: eu})
+	}
+	sort.Slice(stats, func(i, j int) bool {
+		return int(stats[i].carbon) > int(stats[j].carbon)
+	})
+	writeTo(stats, "ra-top-1000", "./output/stats")
+
+}
+
 var param = flag.String("param", "", "what you want to count")
 var countN = flag.Int("N", 10, "number of top artists you want the count for")
 var field = flag.String("field", "", "what you want the total of")
+var orderBy = flag.String("order-by", "carbon", "by which number should this totals list be ordered")
 
 func main() {
 	var files []string
 	flag.Parse()
-	root := "./output/artist-pages/cleanup"
+	root := "./output/artist-pages/done"
 
 	_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if strings.Contains(path, "csv") {
@@ -176,6 +234,8 @@ func main() {
 		countAll(files)
 	case "top-N":
 		countTopN(files, *field, *countN)
+	case "top-all-ordered":
+		countAllOrdered(files, *orderBy)
 	default:
 		log.Fatal("nothing to count :/")
 	}
