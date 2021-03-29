@@ -19,8 +19,8 @@ import (
 var (
 	tourYear    = flag.String("tour.year", "2019", "year in which to scrape artist event schedule")
 	outputDir   = flag.String("output.dir", "./done/artist-pages", "directory to write flight data csv output to")
-	artistFile  = flag.String("artist.inputs", "./fixtures/ra-1000.csv", "precompiled, editied list of the RA artists")
-	airportFile = flag.String("airport.inputs", "/fixtures/airports.csv", "precompiled list of major airpot codes and their major city")
+	artistFile  = flag.String("artist.inputs", os.Getenv("ARTISTS_INPUT"), "precompiled, editied list of the RA artists")
+	airportFile = flag.String("airport.inputs", os.Getenv("AIRPORT_INPUT"), "precompiled list of major airpot codes and their major city")
 
 	googleApiKey  = flag.String("google.apikey", os.Getenv("GOOGLE_API_KEY"), "google api key for airports svc")
 	atmosAcctID   = flag.String("atmos.acctID", os.Getenv("ATMOS_ACCOUNT_ID"), "account id for atmosfaire api")
