@@ -3,3 +3,5 @@ count
 cleanup
 fly
 output
+fixtures/ra-1000.csv
+fixtures/airports.csv

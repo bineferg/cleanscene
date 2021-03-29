@@ -11,7 +11,7 @@ A climate action collective exploring alternative futures for the dance music co
 This project was done in an attempt to bring further awareness to the environmental detriment that our scene creates. The complete list of artists ulitmately used totals at 987. Artists were omitted from this scrape for the following reasons:
 1. The artist tours largely as a band, with a crew and usually by bus.
 1. The artist has passed away.
-1. The atist did not tour at all in 2019.
+1. The artist did not tour at all in 2019.
 1. The artist's hometown was not visible on both RA and SoundCloud.
 1. The artist was independently verified that they do not fly.
 
